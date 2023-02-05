@@ -1,0 +1,88 @@
+---
+title: "Team Assignment"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+##Input Data
+library(readxl)
+case_data<-read_excel(path =  file.choose(), sheet= 2, col_names=TRUE, skip=2)
+```
+
+```{r}
+summary(case_data)
+```
+```{r}
+##Comparing in terms of the underlying assumptions
+##We have assumed while building the model that the error is normally distributed. We hence need to check if that is actually true for the 3 models
+
+##Normality of errors (histogram of residuals)
+hist(case_data$Error_RODRIGUES)
+hist(case_data$Error_STEVENS)
+hist(case_data$Error_ILLY)
+
+## As per the distributions we see that the histogram for RODRIGUES and STEVENS are close to the normal distribution. However, the error distribution for Illy is not exactly normal, and the mean is not at the centre. Hence, ILLYs model does not seem very accurate.
+
+```
+```{r}
+
+## we now check the value of errors
+
+```
+
+
+```{r}
+##Calculating RMSE for each model
+RMSE_rodrigues<-sqrt(mean((case_data$GabrielaRODRIGUES-case_data$PRICE)^2))
+RMSE_stevens<-sqrt(mean((case_data$NeilSTEVENS-case_data$PRICE)^2))
+RMSE_illy<-sqrt(mean((case_data$MarioILLY-case_data$PRICE)^2))
+
+## Illy had the least precise prediction individually.
+```
+
+
+```{r}
+##Calculating R Squared for each model
+(RS_rodrigues<-cor(case_data$GabrielaRODRIGUES,case_data$PRICE)^2)
+(RS_stevens<-cor(case_data$NeilSTEVENS,case_data$PRICE)^2)
+(RS_illy<-cor(case_data$MarioILLY,case_data$PRICE)^2)
+
+## Illy had the least precise prediction individually.
+```
+```{r}
+## Since we are only getting rid of one expert, we should compare their combined models to get an idea of who can be fired. 
+
+coffee.model1 <- lm(formula = PRICE ~ NeilSTEVENS + MarioILLY, data = case_data)
+coffee.model2 <- lm(formula = PRICE ~ GabrielaRODRIGUES + MarioILLY, data = case_data)
+coffee.model3 <- lm(formula = PRICE ~ NeilSTEVENS + GabrielaRODRIGUES, data = case_data)
+summary(coffee.model1)
+summary(coffee.model2)
+summary(coffee.model3)
+
+##Here we note that we see that the model in which we fire Steven’s (model 2) has the highest R square value of 0.9934. This means that the model better fits the data.
+
+```
+
+
+
+```{r}
+##Comparing the correlation of the models  
+cor(case_data$GabrielaRODRIGUES,case_data$NeilSTEVENS)
+cor(case_data$GabrielaRODRIGUES,case_data$MarioILLY)
+cor(case_data$MarioILLY,case_data$NeilSTEVENS)
+
+## Here we see that RODRIGUES and STEVENS have the highest correlation and RODRIGUES and ILLY have the lowest correlation, meaning that they might have differing perspectives. Hence we would let go of Stevens. 
+
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
